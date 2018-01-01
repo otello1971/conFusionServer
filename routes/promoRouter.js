@@ -10,9 +10,10 @@ const promoRouter = express.Router();
 
 promoRouter.use(bodyParser.json());
 
-// -------------------------------------------
-// --           ALL PROMOTIONS ROUTE            --
-// -------------------------------------------
+// -----------------------------------------------
+// --        ALL PROMOTIONS ROUTE: GET          --
+// --  ALL USERS CAN PERFORM THEESE OPERATIONS  --
+// -----------------------------------------------
 promoRouter.route('/')
 .get((req,res,next) => {
     Promotions.find({})
@@ -22,31 +23,36 @@ promoRouter.route('/')
         res.json(promotiones);
     }, (err) => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
+// ------------------------------------------------------
+// --     ALL PROMOTIONS ROUTE: POST, PUT, DELETE      --
+// --  ONLY ADMIN USERS CAN PERFORM THEESE OPERATIONS  --
+// ------------------------------------------------------
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotions.create(req.body)
     .then((promotion) => {
         console.log('Promotion Created ', promotion);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(promotion);
-    }, (err) => next(err));
+    }, (err) => next(err));        
 })
-.put(authenticate.verifyUser, (req, res, next) => {
-    res.statusCode = 403;
-    res.end('PUT operation not supported on /promotiones');
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+        res.statusCode = 403;
+        res.end('PUT operation not supported on /promotiones');        
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotions.remove({})
     .then((resp) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(resp);
-    }, (err) => next(err));    
+    }, (err) => next(err));
 });
 
-// -------------------------------------------
-// --        SPECIFIC PromotionId ROUTE          --
-// -------------------------------------------
+// -----------------------------------------------
+// --      SPECIFIC promotionId ROUTE : GET     --
+// --  ALL USERS CAN PERFORM THEESE OPERATIONS  --
+// -----------------------------------------------
 promoRouter.route('/:promotionId')
 .get((req,res,next) => {
     Promotions.findById(req.params.promotionId)
@@ -56,11 +62,15 @@ promoRouter.route('/:promotionId')
         res.json(promotion);
     }, (err) => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
-    res.statusCode = 403;
-    res.end('POST operation not supported on /promotiones/'+ req.params.promotionId);
+// ----------------------------------------------------
+// -- SPECIFIC promotionId ROUTE : POST, PUT, DELETE --
+// -- ONLY ADMIN USERS CAN PERFORM THEESE OPERATIONS --
+// ----------------------------------------------------
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+        res.statusCode = 403;
+        res.end('POST operation not supported on /promotiones/'+ req.params.promotionId);        
 })
-.put(authenticate.verifyUser, (req, res, next) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotions.findByIdAndUpdate(req.params.promotionId, {
         $set: req.body
     }, { new: true })
@@ -68,15 +78,15 @@ promoRouter.route('/:promotionId')
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(promotion);
-    }, (err) => next(err));
+    }, (err) => next(err));        
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotions.findByIdAndRemove(req.params.promotionId)
     .then((resp) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(resp);
-    }, (err) => next(err));
+    }, (err) => next(err));        
 });
         
 module.exports = promoRouter;

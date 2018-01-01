@@ -7,11 +7,23 @@ var authenticate = require('../authenticate');
 
 router.use(bodyParser.json());
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+// ------------------------------------------------------
+// --               ALL USERS ROUTE: GET               --
+// --  ONLY ADMIN USERS CAN PERFORM THEESE OPERATIONS  --
+// ------------------------------------------------------
+router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => { 
+    User.find({})
+    .then((users) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(users);
+      }, (err) => next(err))
+    .catch((err) => next(err));
 });
-
+// ------------------------------------------------------
+// --                   SIGNUP ROUTE                   --
+// --      ALL USERS CAN PERFORM THEESE OPERATIONS     -- 
+// ------------------------------------------------------
 router.post('/signup', (req, res, next) => {
   User.register(new User({username: req.body.username}), 
     req.body.password, (err, user) => {
@@ -41,7 +53,10 @@ router.post('/signup', (req, res, next) => {
     }
   });
 });
-
+// ------------------------------------------------------
+// --                    LOGIN ROUTE                   --
+// --      ALL USERS CAN PERFORM THEESE OPERATIONS     -- 
+// ------------------------------------------------------
 router.post('/login', passport.authenticate('local'), (req, res) => {
 
   var token = authenticate.getToken({_id: req.user._id});
@@ -49,7 +64,10 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.json({success: true, token: token, status: 'You are successfully logged in!'});
 });
-
+// ------------------------------------------------------
+// --                   LOGOUT ROUTE                   --
+// --      ALL USERS CAN PERFORM THEESE OPERATIONS     -- 
+// ------------------------------------------------------
 router.get('/logout', (req, res) => {
   if (req.session) {
     req.session.destroy();
@@ -62,6 +80,5 @@ router.get('/logout', (req, res) => {
     next(err);
   }
 });
-
 
 module.exports = router;

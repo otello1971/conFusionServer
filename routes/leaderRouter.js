@@ -10,9 +10,10 @@ const leaderRouter = express.Router();
 
 leaderRouter.use(bodyParser.json());
 
-// -------------------------------------------
-// --           ALL LEADERS ROUTE            --
-// -------------------------------------------
+// -----------------------------------------------
+// --         ALL LEADERS ROUTE: GET            --
+// --  ALL USERS CAN PERFORM THEESE OPERATIONS  --
+// -----------------------------------------------
 leaderRouter.route('/')
 .get((req,res,next) => {
     Leaders.find({})
@@ -22,31 +23,36 @@ leaderRouter.route('/')
         res.json(leaders);
     }, (err) => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
+// ------------------------------------------------------
+// --      ALL LEADERS ROUTE: POST, PUT, DELETE        --
+// --  ONLY ADMIN USERS CAN PERFORM THEESE OPERATIONS  --
+// ------------------------------------------------------
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Leaders.create(req.body)
     .then((leader) => {
         console.log('Leader Created ', leader);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(leader);
-    }, (err) => next(err));
+    }, (err) => next(err));        
 })
-.put(authenticate.verifyUser, (req, res, next) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /leaders');
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Leaders.remove({})
     .then((resp) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(resp);
-    }, (err) => next(err));    
-});
+    }, (err) => next(err));          
+ });
 
-// -------------------------------------------
-// --        SPECIFIC LeaderId ROUTE          --
-// -------------------------------------------
+// -----------------------------------------------
+// --       SPECIFIC LeaderId ROUTE : GET       --
+// --  ALL USERS CAN PERFORM THEESE OPERATIONS  --
+// -----------------------------------------------
 leaderRouter.route('/:leaderId')
 .get((req,res,next) => {
     Leaders.findById(req.params.leaderId)
@@ -56,11 +62,15 @@ leaderRouter.route('/:leaderId')
         res.json(leader);
     }, (err) => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
+// ----------------------------------------------------
+// --   SPECIFIC LeaderId ROUTE : POST, PUT, DELETE  --
+// -- ONLY ADMIN USERS CAN PERFORM THEESE OPERATIONS --
+// ----------------------------------------------------
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end('POST operation not supported on /leaders/'+ req.params.leaderId);
 })
-.put(authenticate.verifyUser, (req, res, next) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Leaders.findByIdAndUpdate(req.params.leaderId, {
         $set: req.body
     }, { new: true })
@@ -68,15 +78,15 @@ leaderRouter.route('/:leaderId')
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(leader);
-    }, (err) => next(err));
+    }, (err) => next(err));        
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Leaders.findByIdAndRemove(req.params.leaderId)
     .then((resp) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(resp);
-    }, (err) => next(err));
+    }, (err) => next(err));        
 });
 
 module.exports = leaderRouter;
