@@ -1,21 +1,22 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
 
-var session = require('express-session');
-var FileStore = require('session-file-store')(session);
-var bodyParser = require('body-parser');
+const session = require('express-session');
+const FileStore = require('session-file-store')(session);
+const bodyParser = require('body-parser');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
-var dishRouter = require('./routes/dishRouter');
-var promoRouter = require('./routes/promoRouter');
-var leaderRouter = require('./routes/leaderRouter');
+const index = require('./routes/index');
+const users = require('./routes/users');
+const dishRouter = require('./routes/dishRouter');
+const promoRouter = require('./routes/promoRouter');
+const leaderRouter = require('./routes/leaderRouter');
+const uploadRouter = require('./routes/uploadRouter');
 
-var passport = require('passport');
-var authenticate = require('./authenticate');
-var config = require('./config');
+const passport = require('passport');
+const authenticate = require('./authenticate');
+const config = require('./config');
 
 // -------------------------------------------
 // --    MONGODB LIBRARY IMPORTING          --
@@ -91,6 +92,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leaderRouter);
+app.use('/imageUpload', uploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
