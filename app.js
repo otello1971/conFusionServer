@@ -43,6 +43,9 @@ connect.then((db) => {
     console.log(err);
   });
 
+// -------------------------------------------
+// --          EXPRESS CONFIGURATION        --
+// -------------------------------------------
 var app = express();
 
 // Secure traffic only
